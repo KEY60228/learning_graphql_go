@@ -25,6 +25,14 @@ func (r *mutationResolver) PostPhoto(ctx context.Context, input model.PostPhotoI
 }
 
 func (r *queryResolver) TotalPhotos(ctx context.Context) (int, error) {
+	for _, tag := range Tags {
+		for _, photo := range Photos {
+			if tag.PhotoID == photo.ID {
+				photo.TaggedUsers = append(photo.TaggedUsers, getUserByGithubLogin(tag.UserID))
+			}
+		}
+	}
+
 	return len(Photos), nil
 }
 
@@ -50,6 +58,10 @@ type queryResolver struct{ *Resolver }
 var ID int
 var Users []*model.User
 var Photos []*model.Photo
+var Tags []struct {
+	PhotoID string
+	UserID  string
+}
 
 func init() {
 	if len(Users) == 0 {
@@ -67,21 +79,33 @@ func init() {
 				Name:        "Dropping the Heart Chute",
 				Description: toPtr("The heart chute is one of my favorite chutes"),
 				Category:    model.PhotoCategoryAction,
-				PostedBy:    getUser("gPlake"),
+				PostedBy:    getUserByGithubLogin("gPlake"),
 			},
 			{
 				ID:       "2",
 				Name:     "Enjoying the sunshine",
 				Category: model.PhotoCategorySelfie,
-				PostedBy: getUser("sSchmidt"),
+				PostedBy: getUserByGithubLogin("sSchmidt"),
 			},
 			{
 				ID:          "3",
 				Name:        "Gunbarrel 25",
 				Description: toPtr("25 laps on gunbarrel today"),
 				Category:    model.PhotoCategoryLandscape,
-				PostedBy:    getUser("sSchmidt"),
+				PostedBy:    getUserByGithubLogin("sSchmidt"),
 			},
+		}
+	}
+
+	if len(Tags) == 0 {
+		Tags = []struct {
+			PhotoID string
+			UserID  string
+		}{
+			{PhotoID: "1", UserID: "gPlake"},
+			{PhotoID: "2", UserID: "sSchmidt"},
+			{PhotoID: "3", UserID: "mHattrup"},
+			{PhotoID: "4", UserID: "gPlake"},
 		}
 	}
 }
@@ -90,7 +114,7 @@ func toPtr(s string) *string {
 	return &s
 }
 
-func getUser(s string) *model.User {
+func getUserByGithubLogin(s string) *model.User {
 	for _, user := range Users {
 		if user.GithubLogin == s {
 			return user

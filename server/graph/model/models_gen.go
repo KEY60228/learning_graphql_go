@@ -15,6 +15,7 @@ type Photo struct {
 	Description *string       `json:"description"`
 	Category    PhotoCategory `json:"category"`
 	PostedBy    *User         `json:"postedBy"`
+	TaggedUsers []*User       `json:"taggedUsers"`
 }
 
 type PostPhotoInput struct {
@@ -28,6 +29,7 @@ type User struct {
 	Name         string   `json:"name"`
 	Avatar       *string  `json:"avatar"`
 	PostedPhotos []*Photo `json:"postedPhotos"`
+	InPhotos     []*Photo `json:"inPhotos"`
 }
 
 type PhotoCategory string

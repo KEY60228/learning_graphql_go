@@ -54,6 +54,7 @@ type ComplexityRoot struct {
 		ID          func(childComplexity int) int
 		Name        func(childComplexity int) int
 		PostedBy    func(childComplexity int) int
+		TaggedUsers func(childComplexity int) int
 		URL         func(childComplexity int) int
 	}
 
@@ -65,6 +66,7 @@ type ComplexityRoot struct {
 	User struct {
 		Avatar       func(childComplexity int) int
 		GithubLogin  func(childComplexity int) int
+		InPhotos     func(childComplexity int) int
 		Name         func(childComplexity int) int
 		PostedPhotos func(childComplexity int) int
 	}
@@ -140,6 +142,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Photo.PostedBy(childComplexity), true
 
+	case "Photo.taggedUsers":
+		if e.complexity.Photo.TaggedUsers == nil {
+			break
+		}
+
+		return e.complexity.Photo.TaggedUsers(childComplexity), true
+
 	case "Photo.url":
 		if e.complexity.Photo.URL == nil {
 			break
@@ -174,6 +183,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.GithubLogin(childComplexity), true
+
+	case "User.inPhotos":
+		if e.complexity.User.InPhotos == nil {
+			break
+		}
+
+		return e.complexity.User.InPhotos(childComplexity), true
 
 	case "User.name":
 		if e.complexity.User.Name == nil {
@@ -268,6 +284,7 @@ type Photo {
   description: String
   category: PhotoCategory!
   postedBy: User!
+  taggedUsers: [User!]!
 }
 
 type User {
@@ -275,6 +292,7 @@ type User {
   name: String!
   avatar: String
   postedPhotos: [Photo!]!
+  inPhotos: [Photo!]!
 }
 
 type Query {
@@ -418,6 +436,8 @@ func (ec *executionContext) fieldContext_Mutation_postPhoto(ctx context.Context,
 				return ec.fieldContext_Photo_category(ctx, field)
 			case "postedBy":
 				return ec.fieldContext_Photo_postedBy(ctx, field)
+			case "taggedUsers":
+				return ec.fieldContext_Photo_taggedUsers(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Photo", field.Name)
 		},
@@ -700,6 +720,64 @@ func (ec *executionContext) fieldContext_Photo_postedBy(ctx context.Context, fie
 				return ec.fieldContext_User_avatar(ctx, field)
 			case "postedPhotos":
 				return ec.fieldContext_User_postedPhotos(ctx, field)
+			case "inPhotos":
+				return ec.fieldContext_User_inPhotos(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Photo_taggedUsers(ctx context.Context, field graphql.CollectedField, obj *model.Photo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Photo_taggedUsers(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TaggedUsers, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚕᚖgqlᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Photo_taggedUsers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Photo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "githubLogin":
+				return ec.fieldContext_User_githubLogin(ctx, field)
+			case "name":
+				return ec.fieldContext_User_name(ctx, field)
+			case "avatar":
+				return ec.fieldContext_User_avatar(ctx, field)
+			case "postedPhotos":
+				return ec.fieldContext_User_postedPhotos(ctx, field)
+			case "inPhotos":
+				return ec.fieldContext_User_inPhotos(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -802,6 +880,8 @@ func (ec *executionContext) fieldContext_Query_allPhotos(ctx context.Context, fi
 				return ec.fieldContext_Photo_category(ctx, field)
 			case "postedBy":
 				return ec.fieldContext_Photo_postedBy(ctx, field)
+			case "taggedUsers":
+				return ec.fieldContext_Photo_taggedUsers(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Photo", field.Name)
 		},
@@ -1118,6 +1198,68 @@ func (ec *executionContext) fieldContext_User_postedPhotos(ctx context.Context, 
 				return ec.fieldContext_Photo_category(ctx, field)
 			case "postedBy":
 				return ec.fieldContext_Photo_postedBy(ctx, field)
+			case "taggedUsers":
+				return ec.fieldContext_Photo_taggedUsers(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Photo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_inPhotos(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_inPhotos(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.InPhotos, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Photo)
+	fc.Result = res
+	return ec.marshalNPhoto2ᚕᚖgqlᚋgraphᚋmodelᚐPhotoᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_inPhotos(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Photo_id(ctx, field)
+			case "url":
+				return ec.fieldContext_Photo_url(ctx, field)
+			case "name":
+				return ec.fieldContext_Photo_name(ctx, field)
+			case "description":
+				return ec.fieldContext_Photo_description(ctx, field)
+			case "category":
+				return ec.fieldContext_Photo_category(ctx, field)
+			case "postedBy":
+				return ec.fieldContext_Photo_postedBy(ctx, field)
+			case "taggedUsers":
+				return ec.fieldContext_Photo_taggedUsers(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Photo", field.Name)
 		},
@@ -3056,6 +3198,16 @@ func (ec *executionContext) _Photo(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "taggedUsers":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Photo_taggedUsers(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3197,6 +3349,16 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		case "postedPhotos":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._User_postedPhotos(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "inPhotos":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._User_inPhotos(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -3769,6 +3931,50 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNUser2ᚕᚖgqlᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNUser2ᚖgqlᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNUser2ᚖgqlᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
