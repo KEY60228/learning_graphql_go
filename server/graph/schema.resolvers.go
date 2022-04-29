@@ -6,19 +6,19 @@ package graph
 import (
 	"context"
 	"fmt"
-	"strconv"
-
 	"gql/graph/generated"
 	"gql/graph/model"
+	"strconv"
 )
 
-func (r *mutationResolver) PostPhoto(ctx context.Context, name string, description *string) (*model.Photo, error) {
+func (r *mutationResolver) PostPhoto(ctx context.Context, input model.PostPhotoInput) (*model.Photo, error) {
 	ID++
 	photo := &model.Photo{
 		ID:          strconv.Itoa(ID),
-		Name:        name,
+		Name:        input.Name,
 		URL:         fmt.Sprintf("https://example.com/img/%d.jpg", ID),
-		Description: description,
+		Description: input.Description,
+		Category:    *input.Category,
 	}
 	Photos = append(Photos, photo)
 	return photo, nil

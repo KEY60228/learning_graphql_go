@@ -45,10 +45,11 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
-		PostPhoto func(childComplexity int, name string, description *string) int
+		PostPhoto func(childComplexity int, input model.PostPhotoInput) int
 	}
 
 	Photo struct {
+		Category    func(childComplexity int) int
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Name        func(childComplexity int) int
@@ -62,7 +63,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	PostPhoto(ctx context.Context, name string, description *string) (*model.Photo, error)
+	PostPhoto(ctx context.Context, input model.PostPhotoInput) (*model.Photo, error)
 }
 type QueryResolver interface {
 	TotalPhotos(ctx context.Context) (int, error)
@@ -94,7 +95,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.PostPhoto(childComplexity, args["name"].(string), args["description"].(*string)), true
+		return e.complexity.Mutation.PostPhoto(childComplexity, args["input"].(model.PostPhotoInput)), true
+
+	case "Photo.category":
+		if e.complexity.Photo.Category == nil {
+			break
+		}
+
+		return e.complexity.Photo.Category(childComplexity), true
 
 	case "Photo.description":
 		if e.complexity.Photo.Description == nil {
@@ -202,11 +210,20 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphqls", Input: `type Photo {
+	{Name: "graph/schema.graphqls", Input: `enum PhotoCategory {
+  SELFIE
+  PORTRAIT
+  ACTION
+  LANDSCAPE
+  GRAPHIC
+}
+
+type Photo {
   id: ID!
   url: String!
   name: String!
   description: String
+  category: PhotoCategory!
 }
 
 type Query {
@@ -214,8 +231,14 @@ type Query {
   allPhotos: [Photo!]!
 }
 
+input PostPhotoInput {
+  name: String!
+  category: PhotoCategory=PORTRAIT
+  description: String
+}
+
 type Mutation {
-  postPhoto(name: String! description: String): Photo!
+  postPhoto(input: PostPhotoInput!): Photo!
 }
 `, BuiltIn: false},
 }
@@ -228,24 +251,15 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_postPhoto_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+	var arg0 model.PostPhotoInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNPostPhotoInput2gqlᚋgraphᚋmodelᚐPostPhotoInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["name"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["description"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["description"] = arg1
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -316,7 +330,7 @@ func (ec *executionContext) _Mutation_postPhoto(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().PostPhoto(rctx, fc.Args["name"].(string), fc.Args["description"].(*string))
+		return ec.resolvers.Mutation().PostPhoto(rctx, fc.Args["input"].(model.PostPhotoInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -349,6 +363,8 @@ func (ec *executionContext) fieldContext_Mutation_postPhoto(ctx context.Context,
 				return ec.fieldContext_Photo_name(ctx, field)
 			case "description":
 				return ec.fieldContext_Photo_description(ctx, field)
+			case "category":
+				return ec.fieldContext_Photo_category(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Photo", field.Name)
 		},
@@ -540,6 +556,50 @@ func (ec *executionContext) fieldContext_Photo_description(ctx context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _Photo_category(ctx context.Context, field graphql.CollectedField, obj *model.Photo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Photo_category(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Category, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.PhotoCategory)
+	fc.Result = res
+	return ec.marshalNPhotoCategory2gqlᚋgraphᚋmodelᚐPhotoCategory(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Photo_category(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Photo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type PhotoCategory does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_totalPhotos(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_totalPhotos(ctx, field)
 	if err != nil {
@@ -631,6 +691,8 @@ func (ec *executionContext) fieldContext_Query_allPhotos(ctx context.Context, fi
 				return ec.fieldContext_Photo_name(ctx, field)
 			case "description":
 				return ec.fieldContext_Photo_description(ctx, field)
+			case "category":
+				return ec.fieldContext_Photo_category(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Photo", field.Name)
 		},
@@ -2540,6 +2602,49 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputPostPhotoInput(ctx context.Context, obj interface{}) (model.PostPhotoInput, error) {
+	var it model.PostPhotoInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	if _, present := asMap["category"]; !present {
+		asMap["category"] = "PORTRAIT"
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "category":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
+			it.Category, err = ec.unmarshalOPhotoCategory2ᚖgqlᚋgraphᚋmodelᚐPhotoCategory(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2635,6 +2740,16 @@ func (ec *executionContext) _Photo(ctx context.Context, sel ast.SelectionSet, ob
 
 			out.Values[i] = innerFunc(ctx)
 
+		case "category":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Photo_category(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3262,6 +3377,21 @@ func (ec *executionContext) marshalNPhoto2ᚖgqlᚋgraphᚋmodelᚐPhoto(ctx con
 	return ec._Photo(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNPhotoCategory2gqlᚋgraphᚋmodelᚐPhotoCategory(ctx context.Context, v interface{}) (model.PhotoCategory, error) {
+	var res model.PhotoCategory
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNPhotoCategory2gqlᚋgraphᚋmodelᚐPhotoCategory(ctx context.Context, sel ast.SelectionSet, v model.PhotoCategory) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNPostPhotoInput2gqlᚋgraphᚋmodelᚐPostPhotoInput(ctx context.Context, v interface{}) (model.PostPhotoInput, error) {
+	res, err := ec.unmarshalInputPostPhotoInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3554,6 +3684,22 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOPhotoCategory2ᚖgqlᚋgraphᚋmodelᚐPhotoCategory(ctx context.Context, v interface{}) (*model.PhotoCategory, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.PhotoCategory)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOPhotoCategory2ᚖgqlᚋgraphᚋmodelᚐPhotoCategory(ctx context.Context, sel ast.SelectionSet, v *model.PhotoCategory) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
