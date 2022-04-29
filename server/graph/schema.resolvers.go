@@ -48,4 +48,53 @@ type queryResolver struct{ *Resolver }
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
 var ID int
+var Users []*model.User
 var Photos []*model.Photo
+
+func init() {
+	if len(Users) == 0 {
+		Users = []*model.User{
+			{GithubLogin: "mHattrup", Name: "Mike Hattrup"},
+			{GithubLogin: "gPlake", Name: "Glen Plake"},
+			{GithubLogin: "sSchmidt", Name: "Scot Schmidt"},
+		}
+	}
+
+	if len(Photos) == 0 {
+		Photos = []*model.Photo{
+			{
+				ID:          "1",
+				Name:        "Dropping the Heart Chute",
+				Description: toPtr("The heart chute is one of my favorite chutes"),
+				Category:    model.PhotoCategoryAction,
+				PostedBy:    getUser("gPlake"),
+			},
+			{
+				ID:       "2",
+				Name:     "Enjoying the sunshine",
+				Category: model.PhotoCategorySelfie,
+				PostedBy: getUser("sSchmidt"),
+			},
+			{
+				ID:          "3",
+				Name:        "Gunbarrel 25",
+				Description: toPtr("25 laps on gunbarrel today"),
+				Category:    model.PhotoCategoryLandscape,
+				PostedBy:    getUser("sSchmidt"),
+			},
+		}
+	}
+}
+
+func toPtr(s string) *string {
+	return &s
+}
+
+func getUser(s string) *model.User {
+	for _, user := range Users {
+		if user.GithubLogin == s {
+			return user
+		}
+	}
+	return nil
+}

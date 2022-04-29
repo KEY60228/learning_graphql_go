@@ -12,6 +12,14 @@ type Photo {
   name: String!
   description: String
   category: PhotoCategory!
+  postedBy: User!
+}
+
+type User {
+  githubLogin: ID!
+  name: String!
+  avatar: String
+  postedPhotos: [Photo!]!
 }
 
 type Query {
