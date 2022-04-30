@@ -277,7 +277,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphqls", Input: `enum PhotoCategory {
+	{Name: "../graphql/schema.graphql", Input: `enum PhotoCategory {
   SELFIE
   PORTRAIT
   ACTION
