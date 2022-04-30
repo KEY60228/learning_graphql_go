@@ -26,15 +26,3 @@ func (dt *DateTime) UnmarshalGQL(v interface{}) error {
 	*dt = DateTime(t)
 	return nil
 }
-
-func (dt *DateTime) ToTime() *time.Time {
-	if !dt.exists() {
-		return nil
-	}
-	t := (time.Time)(*dt)
-	return &t
-}
-
-func (dt *DateTime) exists() bool {
-	return dt != nil
-}
