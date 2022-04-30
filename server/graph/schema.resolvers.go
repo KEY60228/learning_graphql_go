@@ -9,6 +9,7 @@ import (
 	"gql/graph/generated"
 	"gql/graph/model"
 	"strconv"
+	"time"
 )
 
 func (r *mutationResolver) PostPhoto(ctx context.Context, input model.PostPhotoInput) (*model.Photo, error) {
@@ -80,12 +81,14 @@ func init() {
 				Description: toPtr("The heart chute is one of my favorite chutes"),
 				Category:    model.PhotoCategoryAction,
 				PostedBy:    getUserByGithubLogin("gPlake"),
+				Created:     model.DateTime(stringToTime("1977/3/28")),
 			},
 			{
 				ID:       "2",
 				Name:     "Enjoying the sunshine",
 				Category: model.PhotoCategorySelfie,
 				PostedBy: getUserByGithubLogin("sSchmidt"),
+				Created:  model.DateTime(stringToTime("1985/1/24")),
 			},
 			{
 				ID:          "3",
@@ -93,6 +96,7 @@ func init() {
 				Description: toPtr("25 laps on gunbarrel today"),
 				Category:    model.PhotoCategoryLandscape,
 				PostedBy:    getUserByGithubLogin("sSchmidt"),
+				Created:     model.DateTime(stringToTime("2018/04/15")),
 			},
 		}
 	}
@@ -112,6 +116,11 @@ func init() {
 
 func toPtr(s string) *string {
 	return &s
+}
+
+func stringToTime(s string) time.Time {
+	t, _ := time.Parse("2006/1/2", s)
+	return t
 }
 
 func getUserByGithubLogin(s string) *model.User {

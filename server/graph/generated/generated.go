@@ -50,6 +50,7 @@ type ComplexityRoot struct {
 
 	Photo struct {
 		Category    func(childComplexity int) int
+		Created     func(childComplexity int) int
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Name        func(childComplexity int) int
@@ -113,6 +114,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Photo.Category(childComplexity), true
+
+	case "Photo.created":
+		if e.complexity.Photo.Created == nil {
+			break
+		}
+
+		return e.complexity.Photo.Created(childComplexity), true
 
 	case "Photo.description":
 		if e.complexity.Photo.Description == nil {
@@ -277,6 +285,8 @@ var sources = []*ast.Source{
   GRAPHIC
 }
 
+scalar DateTime
+
 type Photo {
   id: ID!
   url: String!
@@ -285,6 +295,7 @@ type Photo {
   category: PhotoCategory!
   postedBy: User!
   taggedUsers: [User!]!
+  created: DateTime!
 }
 
 type User {
@@ -438,6 +449,8 @@ func (ec *executionContext) fieldContext_Mutation_postPhoto(ctx context.Context,
 				return ec.fieldContext_Photo_postedBy(ctx, field)
 			case "taggedUsers":
 				return ec.fieldContext_Photo_taggedUsers(ctx, field)
+			case "created":
+				return ec.fieldContext_Photo_created(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Photo", field.Name)
 		},
@@ -785,6 +798,50 @@ func (ec *executionContext) fieldContext_Photo_taggedUsers(ctx context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _Photo_created(ctx context.Context, field graphql.CollectedField, obj *model.Photo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Photo_created(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Created, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.DateTime)
+	fc.Result = res
+	return ec.marshalNDateTime2gqlᚋgraphᚋmodelᚐDateTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Photo_created(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Photo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_totalPhotos(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_totalPhotos(ctx, field)
 	if err != nil {
@@ -882,6 +939,8 @@ func (ec *executionContext) fieldContext_Query_allPhotos(ctx context.Context, fi
 				return ec.fieldContext_Photo_postedBy(ctx, field)
 			case "taggedUsers":
 				return ec.fieldContext_Photo_taggedUsers(ctx, field)
+			case "created":
+				return ec.fieldContext_Photo_created(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Photo", field.Name)
 		},
@@ -1200,6 +1259,8 @@ func (ec *executionContext) fieldContext_User_postedPhotos(ctx context.Context, 
 				return ec.fieldContext_Photo_postedBy(ctx, field)
 			case "taggedUsers":
 				return ec.fieldContext_Photo_taggedUsers(ctx, field)
+			case "created":
+				return ec.fieldContext_Photo_created(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Photo", field.Name)
 		},
@@ -1260,6 +1321,8 @@ func (ec *executionContext) fieldContext_User_inPhotos(ctx context.Context, fiel
 				return ec.fieldContext_Photo_postedBy(ctx, field)
 			case "taggedUsers":
 				return ec.fieldContext_Photo_taggedUsers(ctx, field)
+			case "created":
+				return ec.fieldContext_Photo_created(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Photo", field.Name)
 		},
@@ -3208,6 +3271,16 @@ func (ec *executionContext) _Photo(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "created":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Photo_created(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3813,6 +3886,16 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNDateTime2gqlᚋgraphᚋmodelᚐDateTime(ctx context.Context, v interface{}) (model.DateTime, error) {
+	var res model.DateTime
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDateTime2gqlᚋgraphᚋmodelᚐDateTime(ctx context.Context, sel ast.SelectionSet, v model.DateTime) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {

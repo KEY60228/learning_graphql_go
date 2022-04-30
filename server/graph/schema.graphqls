@@ -6,6 +6,8 @@ enum PhotoCategory {
   GRAPHIC
 }
 
+scalar DateTime
+
 type Photo {
   id: ID!
   url: String!
@@ -14,6 +16,7 @@ type Photo {
   category: PhotoCategory!
   postedBy: User!
   taggedUsers: [User!]!
+  created: DateTime!
 }
 
 type User {

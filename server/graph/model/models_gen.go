@@ -16,6 +16,7 @@ type Photo struct {
 	Category    PhotoCategory `json:"category"`
 	PostedBy    *User         `json:"postedBy"`
 	TaggedUsers []*User       `json:"taggedUsers"`
+	Created     DateTime      `json:"created"`
 }
 
 type PostPhotoInput struct {
