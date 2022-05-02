@@ -8,6 +8,11 @@ import (
 	"strconv"
 )
 
+type AuthPayload struct {
+	Token string `json:"token"`
+	User  *User  `json:"user"`
+}
+
 type Photo struct {
 	ID          string        `json:"id"`
 	URL         string        `json:"url"`
@@ -30,6 +35,7 @@ type PostPhotoInput struct {
 type User struct {
 	GithubLogin string `json:"githubLogin"`
 	Name        string `json:"name"`
+	Avatar      string `json:"avatar"`
 }
 
 type PhotoCategory string

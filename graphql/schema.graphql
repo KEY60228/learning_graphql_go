@@ -22,9 +22,14 @@ type Photo {
 type User {
   githubLogin: ID!
   name: String!
-  # avatar: String
+  avatar: String!
   # postedPhotos: [Photo!]!
   # inPhotos: [Photo!]!
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
 }
 
 type Query {
@@ -42,4 +47,5 @@ input PostPhotoInput {
 
 type Mutation {
   postPhoto(input: PostPhotoInput!): Photo!
+  githubAuth(code: String!): AuthPayload!
 }

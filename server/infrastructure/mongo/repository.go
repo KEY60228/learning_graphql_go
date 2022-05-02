@@ -92,9 +92,10 @@ func (r *Repository) AllPhotos() []*model.Photo {
 		var userRes struct {
 			GithubLogin string
 			Name        string
+			AvatarUrl   string
 		}
 		userColl.FindOne(context.TODO(), bson.D{{"GithubLogin", r.PostedByUserID}}).Decode(&userRes)
-		postedByUser, _ := model.NewUser(userRes.GithubLogin, userRes.Name)
+		postedByUser, _ := model.NewUser(userRes.GithubLogin, userRes.Name, userRes.AvatarUrl)
 
 		var tagRes []struct {
 			PhotoID int64
@@ -111,9 +112,10 @@ func (r *Repository) AllPhotos() []*model.Photo {
 			var userRes struct {
 				GithubLogin string
 				Name        string
+				AvatarUrl   string
 			}
 			userColl.FindOne(context.TODO(), bson.D{{"GithubLogin", tag.UserID}}).Decode(&userRes)
-			taggedUsers[j], _ = model.NewUser(userRes.GithubLogin, userRes.Name)
+			taggedUsers[j], _ = model.NewUser(userRes.GithubLogin, userRes.Name, userRes.AvatarUrl)
 		}
 
 		photos[i], _ = model.NewPhoto(photoRes[i].ID, photoRes[i].URL, photoRes[i].Name, photoRes[i].Description, photoRes[i].Category, postedByUser, taggedUsers, photoRes[i].Created)

@@ -5,9 +5,11 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"gql/domain/service"
 	"gql/graph/generated"
 	"gql/graph/model"
+	"gql/support"
 )
 
 func (r *mutationResolver) PostPhoto(ctx context.Context, input model.PostPhotoInput) (*model.Photo, error) {
@@ -39,6 +41,26 @@ func (r *mutationResolver) PostPhoto(ctx context.Context, input model.PostPhotoI
 	}
 
 	return photo, nil
+}
+
+func (r *mutationResolver) GithubAuth(ctx context.Context, code string) (*model.AuthPayload, error) {
+	data, accessToken := support.AuthorizeWithGitHub(support.GITHUB_CLIENT_ID, support.GITHUB_CLIENT_SECRETS, code)
+
+	if data.Message != "" {
+		return nil, errors.New(data.Message)
+	}
+
+	user, err := model.NewUser(data.Login, data.Name, data.AvatarUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	auth, err := model.NewAuthPayload(accessToken, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return auth, nil
 }
 
 func (r *queryResolver) TotalPhotos(ctx context.Context) (int, error) {

@@ -14,6 +14,7 @@ import (
 	"gql/graph"
 	"gql/graph/generated"
 	m "gql/infrastructure/mongo"
+	"gql/support"
 )
 
 const defaultPort = "8080"
@@ -24,7 +25,7 @@ func main() {
 		port = defaultPort
 	}
 
-	dsn := "mongodb://root:password@localhost:27017/" // 本来であれば環境変数に入れたい
+	dsn := support.MONGODB_URI
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(dsn))
 	if err != nil {
 		panic(err)
