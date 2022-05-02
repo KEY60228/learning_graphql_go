@@ -14,6 +14,7 @@ import (
 	"gql/graph"
 	"gql/graph/generated"
 	m "gql/infrastructure/mongo"
+	"gql/middleware"
 	"gql/support"
 )
 
@@ -31,6 +32,7 @@ func main() {
 	}
 
 	router := chi.NewRouter()
+	router.Use(middleware.Auth(repository))
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{Repo: repository}}))
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
