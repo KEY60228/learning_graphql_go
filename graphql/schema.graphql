@@ -22,9 +22,9 @@ type Photo {
 type User {
   githubLogin: ID!
   name: String!
-  avatar: String
-  postedPhotos: [Photo!]!
-  inPhotos: [Photo!]!
+  # avatar: String
+  # postedPhotos: [Photo!]!
+  # inPhotos: [Photo!]!
 }
 
 type Query {
@@ -34,8 +34,10 @@ type Query {
 
 input PostPhotoInput {
   name: String!
-  category: PhotoCategory=PORTRAIT
   description: String
+  category: PhotoCategory=PORTRAIT
+  postedByUserID: String!
+  taggedUserIDs: [String!]!
 }
 
 type Mutation {

@@ -20,17 +20,16 @@ type Photo struct {
 }
 
 type PostPhotoInput struct {
-	Name        string         `json:"name"`
-	Category    *PhotoCategory `json:"category"`
-	Description *string        `json:"description"`
+	Name           string         `json:"name"`
+	Description    *string        `json:"description"`
+	Category       *PhotoCategory `json:"category"`
+	PostedByUserID string         `json:"postedByUserID"`
+	TaggedUserIDs  []string       `json:"taggedUserIDs"`
 }
 
 type User struct {
-	GithubLogin  string   `json:"githubLogin"`
-	Name         string   `json:"name"`
-	Avatar       *string  `json:"avatar"`
-	PostedPhotos []*Photo `json:"postedPhotos"`
-	InPhotos     []*Photo `json:"inPhotos"`
+	GithubLogin string `json:"githubLogin"`
+	Name        string `json:"name"`
 }
 
 type PhotoCategory string

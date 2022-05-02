@@ -4,4 +4,11 @@ package graph
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
 
-type Resolver struct{}
+import (
+	"gql/domain/model"
+)
+
+type Resolver struct {
+	Repo    model.RepositoryInterface
+	PhotoID int64
+}
