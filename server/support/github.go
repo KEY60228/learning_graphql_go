@@ -16,10 +16,10 @@ type GitHubAccessTokenResponse struct {
 }
 
 type GitHubData struct {
-	Message   string
-	AvatarUrl string
-	Login     string
-	Name      string
+	Message   string `json:"message"`
+	AvatarUrl string `json:"avatar_url"`
+	Login     string `json:"login"`
+	Name      string `json:"name"`
 }
 
 func AuthorizeWithGitHub(clientID string, clientSecret string, code string) (GitHubData, string) {

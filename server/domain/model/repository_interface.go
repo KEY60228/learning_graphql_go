@@ -11,4 +11,6 @@ type RepositoryInterface interface {
 	AllPhotos() []*model.Photo
 	UserByID(string) *model.User
 	UsersByIDs([]string) []*model.User
+	UserByToken(string) *model.User
+	UpdateUser(string, string, string) error
 }

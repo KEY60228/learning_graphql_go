@@ -138,3 +138,25 @@ func (r *Repository) UsersByIDs(ids []string) []*model.User {
 	}
 	return users
 }
+
+func (r *Repository) UserByToken(token string) *model.User {
+	var res struct {
+		GithubLogin string
+		Name        string
+		AvatarUrl   string
+		Token       string
+	}
+	coll := r.DB.Database("graphql").Collection("users")
+	coll.FindOne(context.TODO(), bson.D{{"Token", token}}).Decode(&res)
+	user, _ := model.NewUser(res.GithubLogin, res.Name, res.AvatarUrl)
+	return user
+}
+
+func (r *Repository) UpdateUser(githubLogin string, avatarUrl string, token string) error {
+	coll := r.DB.Database("graphql").Collection("users")
+	_, err := coll.UpdateOne(context.TODO(), bson.D{{"GithubLogin", githubLogin}}, bson.D{{"$set", bson.D{{"AvatarUrl", avatarUrl}, {"Token", token}}}})
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -59,3 +59,8 @@ func (s *Service) UserByID(id string) *model.User {
 func (s *Service) UsersByIDs(ids []string) []*model.User {
 	return s.Repo.UsersByIDs(ids)
 }
+
+func (s *Service) UpdateUser(user *model.User, accessToken string) error {
+	s.Repo.UpdateUser(user.GithubLogin, user.Avatar, accessToken)
+	return nil
+}

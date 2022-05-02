@@ -55,6 +55,8 @@ func (r *mutationResolver) GithubAuth(ctx context.Context, code string) (*model.
 		return nil, err
 	}
 
+	service.NewService(r.Repo).UpdateUser(user, accessToken)
+
 	auth, err := model.NewAuthPayload(accessToken, user)
 	if err != nil {
 		return nil, err
