@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/99designs/gqlgen v0.17.3
+	github.com/go-chi/chi v1.5.4
 	github.com/vektah/gqlparser/v2 v2.4.2
 	go.mongodb.org/mongo-driver v1.9.0
 )
