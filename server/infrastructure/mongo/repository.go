@@ -125,9 +125,15 @@ func (r *Repository) AllPhotos() []*model.Photo {
 }
 
 func (r *Repository) UserByID(id string) *model.User {
-	var user *model.User
+	var res struct {
+		GithubLogin string
+		Name        string
+		AvatarUrl   string
+		Token       string
+	}
 	coll := r.DB.Database("graphql").Collection("users")
-	coll.FindOne(context.TODO(), bson.D{{"ID", id}}).Decode(&user)
+	coll.FindOne(context.TODO(), bson.D{{"GithubLogin", id}}).Decode(&res)
+	user, _ := model.NewUser(res.GithubLogin, res.Name, res.AvatarUrl)
 	return user
 }
 

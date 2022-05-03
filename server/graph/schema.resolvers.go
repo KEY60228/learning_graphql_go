@@ -15,6 +15,11 @@ import (
 )
 
 func (r *mutationResolver) PostPhoto(ctx context.Context, input model.PostPhotoInput) (*model.Photo, error) {
+	user, _ := ctx.Value(middleware.UserCtxKey).(*model.User)
+	if user == nil {
+		return nil, errors.New("unauthorized")
+	}
+
 	var description string
 	if input.Description != nil {
 		description = *input.Description
@@ -35,7 +40,7 @@ func (r *mutationResolver) PostPhoto(ctx context.Context, input model.PostPhotoI
 		input.Name,
 		description,
 		input.Category.String(),
-		input.PostedByUserID,
+		user.GithubLogin,
 		taggedUserIDs,
 	)
 	if err != nil {

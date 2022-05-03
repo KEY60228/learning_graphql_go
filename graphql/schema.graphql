@@ -42,7 +42,6 @@ input PostPhotoInput {
   name: String!
   description: String
   category: PhotoCategory=PORTRAIT
-  postedByUserID: String!
   taggedUserIDs: [String!]!
 }
 

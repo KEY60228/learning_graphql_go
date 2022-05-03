@@ -347,7 +347,6 @@ input PostPhotoInput {
   name: String!
   description: String
   category: PhotoCategory=PORTRAIT
-  postedByUserID: String!
   taggedUserIDs: [String!]!
 }
 
@@ -3264,14 +3263,6 @@ func (ec *executionContext) unmarshalInputPostPhotoInput(ctx context.Context, ob
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
 			it.Category, err = ec.unmarshalOPhotoCategory2ᚖgqlᚋgraphᚋmodelᚐPhotoCategory(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "postedByUserID":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("postedByUserID"))
-			it.PostedByUserID, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
