@@ -60,6 +60,10 @@ func (s *Service) UsersByIDs(ids []string) []*model.User {
 	return s.Repo.UsersByIDs(ids)
 }
 
+func (s *Service) PostUser(githubLogin string, name string, avatar string, accessToken string) error {
+	return s.Repo.PostUser(githubLogin, name, avatar, accessToken)
+}
+
 func (s *Service) UpdateUser(user *model.User, accessToken string) error {
 	s.Repo.UpdateUser(user.GithubLogin, user.Avatar, accessToken)
 	return nil

@@ -12,5 +12,6 @@ type RepositoryInterface interface {
 	UserByID(string) *model.User
 	UsersByIDs([]string) []*model.User
 	UserByToken(string) *model.User
+	PostUser(string, string, string, string) error
 	UpdateUser(string, string, string) error
 }

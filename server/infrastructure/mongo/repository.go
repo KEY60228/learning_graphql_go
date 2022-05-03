@@ -158,6 +158,15 @@ func (r *Repository) UserByToken(token string) *model.User {
 	return user
 }
 
+func (r *Repository) PostUser(githubLogin string, name string, avatarUrl string, token string) error {
+	coll := r.DB.Database("graphql").Collection("users")
+	_, err := coll.InsertOne(context.TODO(), bson.D{{"GithubLogin", githubLogin}, {"Name", name}, {"AvatarUrl", avatarUrl}, {"Token", token}})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (r *Repository) UpdateUser(githubLogin string, avatarUrl string, token string) error {
 	coll := r.DB.Database("graphql").Collection("users")
 	_, err := coll.UpdateOne(context.TODO(), bson.D{{"GithubLogin", githubLogin}}, bson.D{{"$set", bson.D{{"AvatarUrl", avatarUrl}, {"Token", token}}}})

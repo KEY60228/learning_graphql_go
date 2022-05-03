@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-
 	"gql/domain/service"
 	"gql/graph/generated"
 	"gql/graph/model"
@@ -70,6 +69,20 @@ func (r *mutationResolver) GithubAuth(ctx context.Context, code string) (*model.
 	}
 
 	return auth, nil
+}
+
+func (r *mutationResolver) AddFakeUsers(ctx context.Context, count int) ([]*model.User, error) {
+	users, tokens, err := support.AddFakeUsers(count)
+	if err != nil {
+		return nil, err
+	}
+
+	serv := service.NewService(r.Repo)
+	for i, user := range users {
+		serv.PostUser(user.GithubLogin, user.Name, user.Avatar, tokens[i])
+	}
+
+	return users, nil
 }
 
 func (r *queryResolver) TotalPhotos(ctx context.Context) (int, error) {
