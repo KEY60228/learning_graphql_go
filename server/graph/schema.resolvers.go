@@ -6,9 +6,11 @@ package graph
 import (
 	"context"
 	"errors"
+
 	"gql/domain/service"
 	"gql/graph/generated"
 	"gql/graph/model"
+	"gql/middleware"
 	"gql/support"
 )
 
@@ -79,6 +81,14 @@ func (r *queryResolver) AllPhotos(ctx context.Context) ([]*model.Photo, error) {
 		return nil, err
 	}
 	return photos, nil
+}
+
+func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
+	user, ok := ctx.Value(middleware.UserCtxKey).(*model.User)
+	if !ok {
+		return nil, errors.New("bad request")
+	}
+	return user, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

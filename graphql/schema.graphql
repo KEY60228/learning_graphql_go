@@ -35,6 +35,7 @@ type AuthPayload {
 type Query {
   totalPhotos: Int!
   allPhotos: [Photo!]!
+  me: User
 }
 
 input PostPhotoInput {
