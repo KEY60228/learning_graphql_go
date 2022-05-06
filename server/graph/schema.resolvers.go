@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+
 	"gql/domain/service"
 	"gql/graph/generated"
 	"gql/graph/model"
@@ -85,6 +86,14 @@ func (r *mutationResolver) AddFakeUsers(ctx context.Context, count int) ([]*mode
 	return users, nil
 }
 
+func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
+	user, ok := ctx.Value(middleware.UserCtxKey).(*model.User)
+	if !ok {
+		return nil, errors.New("bad request")
+	}
+	return user, nil
+}
+
 func (r *queryResolver) TotalPhotos(ctx context.Context) (int, error) {
 	count, err := service.NewService(r.Repo).TotalPhotos(ctx)
 	if err != nil {
@@ -101,12 +110,20 @@ func (r *queryResolver) AllPhotos(ctx context.Context) ([]*model.Photo, error) {
 	return photos, nil
 }
 
-func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
-	user, ok := ctx.Value(middleware.UserCtxKey).(*model.User)
-	if !ok {
-		return nil, errors.New("bad request")
+func (r *queryResolver) TotalUsers(ctx context.Context) (int, error) {
+	count, err := service.NewService(r.Repo).TotalUsers(ctx)
+	if err != nil {
+		return -1, err
 	}
-	return user, nil
+	return count, err
+}
+
+func (r *queryResolver) AllUsers(ctx context.Context) ([]*model.User, error) {
+	users, err := service.NewService(r.Repo).AllUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

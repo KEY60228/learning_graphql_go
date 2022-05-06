@@ -52,6 +52,15 @@ func (s *Service) AllPhotos(ctx context.Context) ([]*model.Photo, error) {
 	return photos, nil
 }
 
+func (s *Service) TotalUsers(ctx context.Context) (int, error) {
+	return s.Repo.TotalUsers(), nil
+}
+
+func (s *Service) AllUsers(ctx context.Context) ([]*model.User, error) {
+	users := s.Repo.AllUsers()
+	return users, nil
+}
+
 func (s *Service) UserByID(id string) *model.User {
 	return s.Repo.UserByID(id)
 }

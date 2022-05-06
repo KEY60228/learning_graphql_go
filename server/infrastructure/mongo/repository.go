@@ -124,6 +124,33 @@ func (r *Repository) AllPhotos() []*model.Photo {
 	return photos
 }
 
+func (r *Repository) TotalUsers() int {
+	coll := r.DB.Database("graphql").Collection("users")
+	count, _ := coll.CountDocuments(context.TODO(), bson.D{})
+	return int(count)
+}
+
+func (r *Repository) AllUsers() []*model.User {
+	userColl := r.DB.Database("graphql").Collection("users")
+	cursor, err := userColl.Find(context.TODO(), bson.D{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	var userRes []struct {
+		GithubLogin string
+		Name        string
+		AvatarUrl   string
+	}
+	cursor.All(context.TODO(), &userRes)
+
+	users := make([]*model.User, len(userRes))
+	for i, r := range userRes {
+		users[i], _ = model.NewUser(r.GithubLogin, r.Name, r.AvatarUrl)
+	}
+
+	return users
+}
+
 func (r *Repository) UserByID(id string) *model.User {
 	var res struct {
 		GithubLogin string
