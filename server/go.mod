@@ -5,6 +5,8 @@ go 1.17
 require (
 	github.com/99designs/gqlgen v0.17.3
 	github.com/go-chi/chi v1.5.4
+	github.com/gorilla/websocket v1.4.2
+	github.com/rs/cors v1.8.2
 	github.com/vektah/gqlparser/v2 v2.4.2
 	go.mongodb.org/mongo-driver v1.9.0
 )
@@ -14,7 +16,6 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.0 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/matryer/moq v0.2.3 // indirect
