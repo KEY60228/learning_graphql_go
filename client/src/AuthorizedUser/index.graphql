@@ -3,3 +3,13 @@ mutation githubAuth($code: String!) {
         token
     }
 }
+
+fragment userInfo on User {
+    githubLogin
+    name
+    avatar
+}
+
+query me {
+    me { ...userInfo }
+}

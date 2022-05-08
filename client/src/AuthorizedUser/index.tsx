@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { GithubAuthMutation, useGithubAuthMutation } from '../generated/graphql'
 
+import { Me } from './Me'
+
 export const AuthorizedUser: React.FC = () => {
     const [isSigningIn, setIsSigningIn] = useState<boolean>(false)
     const [githubAuthMutation] = useGithubAuthMutation()
@@ -14,7 +16,6 @@ export const AuthorizedUser: React.FC = () => {
         localStorage.setItem('token', data.githubAuth.token)
         window.location.replace("/")
         setIsSigningIn(false)
-        alert(data.githubAuth.token)
     }
 
     const githubAuth = async(code: string) => {
@@ -23,6 +24,11 @@ export const AuthorizedUser: React.FC = () => {
                 code: code,
             },
         }).then(({data}) => data && authorizationComplete(data))
+    }
+
+    const logout = () => {
+        localStorage.removeItem("token")
+        window.location.reload()
     }
 
     useEffect(() => {
@@ -34,6 +40,6 @@ export const AuthorizedUser: React.FC = () => {
     }, [])
 
     return (
-        <button onClick={requestCode} disabled={isSigningIn}>Sign In with GitHub</button>
+        <Me isSingingIn={isSigningIn} requestCode={requestCode} logout={logout} />
     )
 }

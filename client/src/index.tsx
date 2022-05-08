@@ -8,7 +8,7 @@ import { ApolloProvider, ApolloClient, HttpLink, InMemoryCache } from '@apollo/c
 const link = new HttpLink({
   uri: "http://localhost:8080/query",
   headers: {
-    authorization: "e753ebecac81ade72470c507d0de84484dc84ca9"
+    authorization: localStorage.getItem("token")
   }
 })
 const cache = new InMemoryCache()
