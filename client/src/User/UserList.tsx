@@ -8,6 +8,7 @@ interface props {
     count: number
     users: User[]
     refetch: () => Promise<ApolloQueryResult<AllUsersQuery>>
+    addFakeUsers: (count: number) => void
 }
 
 export const UserList: React.FC<props> = props => {
@@ -15,6 +16,7 @@ export const UserList: React.FC<props> = props => {
         <div>
             <p>{props.count} users</p>
             <button onClick={() => props.refetch()}>Refetch Users</button>
+            <button onClick={() => props.addFakeUsers(1)}>Add Fake Users</button>
             <ul>
                 {props.users.map(user => 
                     <UserListItem key={user.githubLogin} name={user.name} avatar={user.avatar} />

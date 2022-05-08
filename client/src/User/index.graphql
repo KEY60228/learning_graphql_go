@@ -6,3 +6,11 @@ query allUsers {
         avatar
     }
 }
+
+mutation addFakeUsers($count: Int!) {
+    addFakeUsers(count: $count) {
+        githubLogin
+        name
+        avatar
+    }
+}

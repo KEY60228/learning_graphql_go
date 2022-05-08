@@ -92,6 +92,13 @@ export type AllUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type AllUsersQuery = { __typename?: 'Query', totalUsers: number, allUsers: Array<{ __typename?: 'User', githubLogin: string, name: string, avatar: string }> };
 
+export type AddFakeUsersMutationVariables = Exact<{
+  count: Scalars['Int'];
+}>;
+
+
+export type AddFakeUsersMutation = { __typename?: 'Mutation', addFakeUsers: Array<{ __typename?: 'User', githubLogin: string, name: string, avatar: string }> };
+
 
 export const AllUsersDocument = gql`
     query allUsers {
@@ -130,3 +137,38 @@ export function useAllUsersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<A
 export type AllUsersQueryHookResult = ReturnType<typeof useAllUsersQuery>;
 export type AllUsersLazyQueryHookResult = ReturnType<typeof useAllUsersLazyQuery>;
 export type AllUsersQueryResult = Apollo.QueryResult<AllUsersQuery, AllUsersQueryVariables>;
+export const AddFakeUsersDocument = gql`
+    mutation addFakeUsers($count: Int!) {
+  addFakeUsers(count: $count) {
+    githubLogin
+    name
+    avatar
+  }
+}
+    `;
+export type AddFakeUsersMutationFn = Apollo.MutationFunction<AddFakeUsersMutation, AddFakeUsersMutationVariables>;
+
+/**
+ * __useAddFakeUsersMutation__
+ *
+ * To run a mutation, you first call `useAddFakeUsersMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddFakeUsersMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addFakeUsersMutation, { data, loading, error }] = useAddFakeUsersMutation({
+ *   variables: {
+ *      count: // value for 'count'
+ *   },
+ * });
+ */
+export function useAddFakeUsersMutation(baseOptions?: Apollo.MutationHookOptions<AddFakeUsersMutation, AddFakeUsersMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddFakeUsersMutation, AddFakeUsersMutationVariables>(AddFakeUsersDocument, options);
+      }
+export type AddFakeUsersMutationHookResult = ReturnType<typeof useAddFakeUsersMutation>;
+export type AddFakeUsersMutationResult = Apollo.MutationResult<AddFakeUsersMutation>;
+export type AddFakeUsersMutationOptions = Apollo.BaseMutationOptions<AddFakeUsersMutation, AddFakeUsersMutationVariables>;
