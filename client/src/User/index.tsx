@@ -4,7 +4,7 @@ import { useAddFakeUsersMutation, useAllUsersQuery } from '../generated/graphql'
 import { UserList } from './UserList'
 
 export const User: React.FC = () => {
-    const { loading, data, refetch } = useAllUsersQuery()
+    const { loading, data, refetch } = useAllUsersQuery({fetchPolicy: "cache-and-network"})
     const [ addFakeUsersMutation ] = useAddFakeUsersMutation()
 
     const addFakeUsers = async(count: number) => {
