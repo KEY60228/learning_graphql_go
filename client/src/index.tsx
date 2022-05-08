@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ApolloProvider, ApolloClient, HttpLink, InMemoryCache } from '@apollo/client'
+import { persistCache, LocalStorageWrapper } from 'apollo3-cache-persist';
+
+import App from './App';
 
 const link = new HttpLink({
   uri: "http://localhost:8080/query",
@@ -12,7 +13,16 @@ const link = new HttpLink({
   }
 })
 const cache = new InMemoryCache()
+persistCache({
+  cache,
+  storage: new LocalStorageWrapper(localStorage),
+})
 const client = new ApolloClient({link, cache})
+
+if (localStorage['apollo-cache-persist']) {
+  const cacheData = JSON.parse(localStorage['apollo-cache-persist'])
+  cache.restore(cacheData)
+}
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
