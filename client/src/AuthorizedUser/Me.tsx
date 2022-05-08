@@ -10,7 +10,7 @@ interface props {
 }
 
 export const Me: React.FC<props> = props => {
-    const { loading, data } = useMeQuery()
+    const { loading, data } = useMeQuery({fetchPolicy: "cache-and-network"})
 
     return (
         <>
