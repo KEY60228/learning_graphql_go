@@ -87,6 +87,13 @@ export type User = {
   name: Scalars['String'];
 };
 
+export type GithubAuthMutationVariables = Exact<{
+  code: Scalars['String'];
+}>;
+
+
+export type GithubAuthMutation = { __typename?: 'Mutation', githubAuth: { __typename?: 'AuthPayload', token: string } };
+
 export type AllUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -100,6 +107,39 @@ export type AddFakeUsersMutationVariables = Exact<{
 export type AddFakeUsersMutation = { __typename?: 'Mutation', addFakeUsers: Array<{ __typename?: 'User', githubLogin: string, name: string, avatar: string }> };
 
 
+export const GithubAuthDocument = gql`
+    mutation githubAuth($code: String!) {
+  githubAuth(code: $code) {
+    token
+  }
+}
+    `;
+export type GithubAuthMutationFn = Apollo.MutationFunction<GithubAuthMutation, GithubAuthMutationVariables>;
+
+/**
+ * __useGithubAuthMutation__
+ *
+ * To run a mutation, you first call `useGithubAuthMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGithubAuthMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [githubAuthMutation, { data, loading, error }] = useGithubAuthMutation({
+ *   variables: {
+ *      code: // value for 'code'
+ *   },
+ * });
+ */
+export function useGithubAuthMutation(baseOptions?: Apollo.MutationHookOptions<GithubAuthMutation, GithubAuthMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<GithubAuthMutation, GithubAuthMutationVariables>(GithubAuthDocument, options);
+      }
+export type GithubAuthMutationHookResult = ReturnType<typeof useGithubAuthMutation>;
+export type GithubAuthMutationResult = Apollo.MutationResult<GithubAuthMutation>;
+export type GithubAuthMutationOptions = Apollo.BaseMutationOptions<GithubAuthMutation, GithubAuthMutationVariables>;
 export const AllUsersDocument = gql`
     query allUsers {
   totalUsers
