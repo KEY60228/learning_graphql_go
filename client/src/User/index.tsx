@@ -1,5 +1,5 @@
 import React from 'react'
-import { useAddFakeUsersMutation, useAllUsersQuery } from '../generated/graphql'
+import { AllUsersDocument, AllUsersQuery, AllUsersQueryVariables, useAddFakeUsersMutation, useAllUsersQuery } from '../generated/graphql'
 
 import { UserList } from './UserList'
 
@@ -12,6 +12,23 @@ export const User: React.FC = () => {
             variables: {
                 count: count,
             },
+            update(cache, {data}) {
+                const option = { query: AllUsersDocument }
+                const { allUsers, totalUsers } = cache.readQuery<AllUsersQuery, AllUsersQueryVariables>(option) || {}
+                if (!allUsers || !totalUsers) {
+                    return
+                }
+                cache.writeQuery<AllUsersQuery, AllUsersQueryVariables>({
+                    query: AllUsersDocument,
+                    data: {
+                        totalUsers: totalUsers + count,
+                        allUsers: {
+                            ...allUsers,
+                            ...data?.addFakeUsers,
+                        }
+                    }
+                })
+            }
         })
     }
 
