@@ -6,7 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
-
+	"fmt"
 	"gql/domain/service"
 	"gql/graph/generated"
 	"gql/graph/model"
@@ -19,6 +19,7 @@ func (r *mutationResolver) PostPhoto(ctx context.Context, input model.PostPhotoI
 	if user == nil {
 		return nil, errors.New("unauthorized")
 	}
+	fmt.Println(*user)
 
 	var description string
 	if input.Description != nil {
@@ -46,6 +47,12 @@ func (r *mutationResolver) PostPhoto(ctx context.Context, input model.PostPhotoI
 	if err != nil {
 		return nil, err
 	}
+
+	r.mutex.Lock()
+	for _, ch := range r.subscribers {
+		ch <- photo
+	}
+	r.mutex.Unlock()
 
 	return photo, nil
 }
@@ -126,11 +133,37 @@ func (r *queryResolver) AllUsers(ctx context.Context) ([]*model.User, error) {
 	return users, nil
 }
 
+func (r *subscriptionResolver) NewPhoto(ctx context.Context, githubLogin string) (<-chan *model.Photo, error) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	if _, ok := r.subscribers[githubLogin]; ok {
+		err := fmt.Errorf("`%s` has already been subscribed", githubLogin)
+		return nil, err
+	}
+
+	ch := make(chan *model.Photo, 1)
+	r.subscribers[githubLogin] = ch
+
+	go func() {
+		<-ctx.Done()
+		r.mutex.Lock()
+		delete(r.subscribers, githubLogin)
+		r.mutex.Unlock()
+	}()
+
+	return ch, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+// Subscription returns generated.SubscriptionResolver implementation.
+func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subscriptionResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type subscriptionResolver struct{ *Resolver }
