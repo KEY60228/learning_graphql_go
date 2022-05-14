@@ -8,6 +8,8 @@ enum PhotoCategory {
 
 scalar DateTime
 
+scalar Upload
+
 type Photo {
   id: ID!
   url: String!
@@ -45,6 +47,7 @@ input PostPhotoInput {
   description: String
   category: PhotoCategory=PORTRAIT
   taggedUserIDs: [String!]!
+  file: Upload!
 }
 
 type Mutation {
