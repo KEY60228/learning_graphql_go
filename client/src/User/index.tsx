@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { AllUsersDocument, AllUsersQuery, AllUsersQueryVariables, NewUsersDocument, useAddFakeUsersMutation, useAllUsersQuery } from '../generated/graphql'
 
+import { AuthorizedUser } from '../AuthorizedUser'
 import { UserList } from './UserList'
 
 export const User: React.FC = () => {
@@ -52,6 +53,7 @@ export const User: React.FC = () => {
 
     return (
         <>
+            <AuthorizedUser />
             {loading &&
                 <p>loading users...</p>
             }
