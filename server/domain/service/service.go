@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	models "gql/domain/model"
@@ -20,6 +19,7 @@ func NewService(repo models.RepositoryInterface) *Service {
 func (s *Service) PostPhoto(
 	ctx context.Context,
 	photoID int64,
+	filePath string,
 	name string,
 	description string,
 	category string,
@@ -30,12 +30,12 @@ func (s *Service) PostPhoto(
 	users := s.UsersByIDs(taggedUserIDs)
 	now := time.Now()
 
-	err := s.Repo.PostPhoto(photoID, fmt.Sprintf("https://example.com/img/%d.jpg", photoID), name, description, category, postedUserID, taggedUserIDs, now)
+	err := s.Repo.PostPhoto(photoID, filePath, name, description, category, postedUserID, taggedUserIDs, now)
 	if err != nil {
 		return nil, err
 	}
 
-	photo, err := model.NewPhoto(photoID, fmt.Sprintf("https://example.com/img/%d.jpg", photoID), name, description, category, user, users, now)
+	photo, err := model.NewPhoto(photoID, filePath, name, description, category, user, users, now)
 	if err != nil {
 		return nil, err
 	}

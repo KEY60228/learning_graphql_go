@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -63,8 +64,11 @@ func main() {
 		Cache: lru.New(100),
 	})
 
+	dir, _ := os.Getwd()
+
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)
+	router.Handle("/img/*", http.FileServer(http.Dir(dir)))
 
 	log.Println("connect to http://localhost:8080/ for GraphQL playground")
 	log.Fatal(http.ListenAndServe(":8080", router))

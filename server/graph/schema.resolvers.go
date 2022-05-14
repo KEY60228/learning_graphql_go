@@ -12,6 +12,9 @@ import (
 	"gql/graph/model"
 	"gql/middleware"
 	"gql/support"
+	"io"
+	"os"
+	"path"
 )
 
 func (r *mutationResolver) PostPhoto(ctx context.Context, input model.PostPhotoInput) (*model.Photo, error) {
@@ -19,13 +22,25 @@ func (r *mutationResolver) PostPhoto(ctx context.Context, input model.PostPhotoI
 	if user == nil {
 		return nil, errors.New("unauthorized")
 	}
-	fmt.Println(*user)
 
 	var description string
 	if input.Description != nil {
 		description = *input.Description
 	} else {
 		description = ""
+	}
+
+	fileDirPath := "img"
+	file, err := io.ReadAll(input.File.File)
+	if err != nil {
+		return nil, err
+	}
+	filePath := path.Join(fileDirPath, input.File.Filename)
+	if _, err := os.Create(filePath); err != nil {
+		return nil, err
+	}
+	if err := os.WriteFile(filePath, file, os.FileMode(0o666)); err != nil {
+		return nil, err
 	}
 
 	taggedUserIDs := make([]string, len(input.TaggedUserIDs))
@@ -38,6 +53,7 @@ func (r *mutationResolver) PostPhoto(ctx context.Context, input model.PostPhotoI
 	photo, err := service.NewService(r.Repo).PostPhoto(
 		ctx,
 		r.PhotoID,
+		fmt.Sprintf("http://localhost:8080/%s", filePath), // TODO
 		input.Name,
 		description,
 		input.Category.String(),
