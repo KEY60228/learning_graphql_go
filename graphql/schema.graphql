@@ -54,5 +54,6 @@ type Mutation {
 }
 
 type Subscription {
+  newUsers(githubLogin: String!): [User!]!
   newPhoto(githubLogin: String!): Photo!
 }

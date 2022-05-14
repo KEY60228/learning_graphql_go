@@ -12,17 +12,19 @@ import (
 )
 
 type Resolver struct {
-	Repo        models.RepositoryInterface
-	subscribers map[string]chan<- *model.Photo
-	mutex       sync.Mutex
-	PhotoID     int64
+	Repo             models.RepositoryInterface
+	photoSubscribers map[string]chan<- *model.Photo
+	userSubscribers  map[string]chan<- []*model.User
+	mutex            sync.Mutex
+	PhotoID          int64
 }
 
 func NewResolver(repo models.RepositoryInterface, photoID int64) *Resolver {
 	return &Resolver{
-		Repo:        repo,
-		subscribers: map[string]chan<- *model.Photo{},
-		mutex:       sync.Mutex{},
-		PhotoID:     photoID,
+		Repo:             repo,
+		photoSubscribers: map[string]chan<- *model.Photo{},
+		userSubscribers:  map[string]chan<- []*model.User{},
+		mutex:            sync.Mutex{},
+		PhotoID:          photoID,
 	}
 }

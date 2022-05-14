@@ -78,6 +78,7 @@ type ComplexityRoot struct {
 
 	Subscription struct {
 		NewPhoto func(childComplexity int, githubLogin string) int
+		NewUsers func(childComplexity int, githubLogin string) int
 	}
 
 	User struct {
@@ -100,6 +101,7 @@ type QueryResolver interface {
 	AllUsers(ctx context.Context) ([]*model.User, error)
 }
 type SubscriptionResolver interface {
+	NewUsers(ctx context.Context, githubLogin string) (<-chan []*model.User, error)
 	NewPhoto(ctx context.Context, githubLogin string) (<-chan *model.Photo, error)
 }
 
@@ -271,6 +273,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Subscription.NewPhoto(childComplexity, args["githubLogin"].(string)), true
 
+	case "Subscription.newUsers":
+		if e.complexity.Subscription.NewUsers == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_newUsers_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.NewUsers(childComplexity, args["githubLogin"].(string)), true
+
 	case "User.avatar":
 		if e.complexity.User.Avatar == nil {
 			break
@@ -429,6 +443,7 @@ type Mutation {
 }
 
 type Subscription {
+  newUsers(githubLogin: String!): [User!]!
   newPhoto(githubLogin: String!): Photo!
 }
 `, BuiltIn: false},
@@ -500,6 +515,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 }
 
 func (ec *executionContext) field_Subscription_newPhoto_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["githubLogin"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("githubLogin"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["githubLogin"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Subscription_newUsers_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -1586,6 +1616,79 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Subscription_newUsers(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	fc, err := ec.fieldContext_Subscription_newUsers(ctx, field)
+	if err != nil {
+		return nil
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().NewUsers(rctx, fc.Args["githubLogin"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func(ctx context.Context) graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan []*model.User)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNUser2ᚕᚖgqlᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) fieldContext_Subscription_newUsers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "githubLogin":
+				return ec.fieldContext_User_githubLogin(ctx, field)
+			case "name":
+				return ec.fieldContext_User_name(ctx, field)
+			case "avatar":
+				return ec.fieldContext_User_avatar(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Subscription_newUsers_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
 	}
 	return fc, nil
 }
@@ -4005,6 +4108,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 	}
 
 	switch fields[0].Name {
+	case "newUsers":
+		return ec._Subscription_newUsers(ctx, fields[0])
 	case "newPhoto":
 		return ec._Subscription_newPhoto(ctx, fields[0])
 	default:
