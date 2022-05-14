@@ -3,6 +3,7 @@ import { AllUsersDocument, AllUsersQuery, AllUsersQueryVariables, NewUsersDocume
 
 import { AuthorizedUser } from '../AuthorizedUser'
 import { UserList } from './UserList'
+import { Photo } from '../Photo'
 
 export const User: React.FC = () => {
     const { loading, data, refetch, subscribeToMore } = useAllUsersQuery({fetchPolicy: "cache-and-network"})
@@ -60,6 +61,7 @@ export const User: React.FC = () => {
             {!loading && data &&
                 <UserList count={data.totalUsers} users={data.allUsers} refetch={refetch} addFakeUsers={addFakeUsers} />
             }
+            <Photo />
         </>
     )
 }

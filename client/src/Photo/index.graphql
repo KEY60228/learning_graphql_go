@@ -1,3 +1,12 @@
+query allPhotos {
+    totalPhotos
+    allPhotos {
+        id
+        name
+        url
+    }
+}
+
 subscription newPhoto($githubLogin: String!) {
     newPhoto(githubLogin: $githubLogin) {
         url
