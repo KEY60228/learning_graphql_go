@@ -1,0 +1,7 @@
+mutation postPhoto($input: PostPhotoInput!) {
+    postPhoto(input: $input) {
+        id
+        name
+        url
+    }
+}

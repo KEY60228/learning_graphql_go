@@ -1,15 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
-import { ApolloProvider, ApolloClient, HttpLink, InMemoryCache, split } from '@apollo/client'
+import { ApolloProvider, ApolloClient, InMemoryCache, split } from '@apollo/client'
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
+import { createUploadLink } from 'apollo-upload-client'
 import { createClient } from 'graphql-ws'
 import { persistCache, LocalStorageWrapper } from 'apollo3-cache-persist';
 
 import App from './App';
 import { getMainDefinition } from '@apollo/client/utilities';
 
-const link = new HttpLink({
+const link = createUploadLink({
   uri: "http://localhost:8080/query",
   headers: {
     authorization: localStorage.getItem("token")
