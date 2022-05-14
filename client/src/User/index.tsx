@@ -1,10 +1,10 @@
-import React from 'react'
-import { AllUsersDocument, AllUsersQuery, AllUsersQueryVariables, useAddFakeUsersMutation, useAllUsersQuery } from '../generated/graphql'
+import React, { useEffect } from 'react'
+import { AllUsersDocument, AllUsersQuery, AllUsersQueryVariables, NewUsersDocument, useAddFakeUsersMutation, useAllUsersQuery } from '../generated/graphql'
 
 import { UserList } from './UserList'
 
 export const User: React.FC = () => {
-    const { loading, data, refetch } = useAllUsersQuery({fetchPolicy: "cache-and-network"})
+    const { loading, data, refetch, subscribeToMore } = useAllUsersQuery({fetchPolicy: "cache-and-network"})
     const [ addFakeUsersMutation ] = useAddFakeUsersMutation()
 
     const addFakeUsers = async(count: number) => {
@@ -31,6 +31,24 @@ export const User: React.FC = () => {
             }
         })
     }
+
+    const subscribeToNewUsers = (githubLogin: string) => {
+        subscribeToMore({
+            document: NewUsersDocument,
+            variables: {githubLogin},
+            updateQuery: (prev, { subscriptionData }) => {
+                if (!subscriptionData.data) return prev
+                const newUsers = subscriptionData.data
+                return Object.assign({}, prev, {
+                    allUsers: [newUsers, ...prev.allUsers]
+                })
+            }
+        })
+    }
+
+    useEffect(() => {
+        subscribeToNewUsers("KEY60228") // TODO: 動的に
+    }, [])
 
     return (
         <>
