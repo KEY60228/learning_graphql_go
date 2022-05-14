@@ -1,0 +1,11 @@
+subscription newPhoto($githubLogin: String!) {
+    newPhoto(githubLogin: $githubLogin) {
+        url
+        category
+        postedBy {
+            githubLogin
+            name
+            avatar
+        }
+    }
+}

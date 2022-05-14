@@ -14,3 +14,11 @@ mutation addFakeUsers($count: Int!) {
         avatar
     }
 }
+
+subscription newUsers($githubLogin: String!) {
+    newUsers(githubLogin: $githubLogin) {
+        githubLogin
+        name
+        avatar
+    }
+}
