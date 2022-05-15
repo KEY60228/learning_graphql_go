@@ -6,12 +6,15 @@ package graph
 import (
 	"context"
 	"errors"
-
+	"fmt"
 	"gql/domain/service"
 	"gql/graph/generated"
 	"gql/graph/model"
 	"gql/middleware"
 	"gql/support"
+	"io"
+	"os"
+	"path"
 )
 
 func (r *mutationResolver) PostPhoto(ctx context.Context, input model.PostPhotoInput) (*model.Photo, error) {
@@ -27,6 +30,19 @@ func (r *mutationResolver) PostPhoto(ctx context.Context, input model.PostPhotoI
 		description = ""
 	}
 
+	fileDirPath := "img"
+	file, err := io.ReadAll(input.File.File)
+	if err != nil {
+		return nil, err
+	}
+	filePath := path.Join(fileDirPath, input.File.Filename)
+	if _, err := os.Create(filePath); err != nil {
+		return nil, err
+	}
+	if err := os.WriteFile(filePath, file, os.FileMode(0o666)); err != nil {
+		return nil, err
+	}
+
 	taggedUserIDs := make([]string, len(input.TaggedUserIDs))
 	for i, id := range input.TaggedUserIDs {
 		taggedUserIDs[i] = id
@@ -37,6 +53,7 @@ func (r *mutationResolver) PostPhoto(ctx context.Context, input model.PostPhotoI
 	photo, err := service.NewService(r.Repo).PostPhoto(
 		ctx,
 		r.PhotoID,
+		fmt.Sprintf("http://localhost:8080/%s", filePath), // TODO
 		input.Name,
 		description,
 		input.Category.String(),
@@ -46,6 +63,12 @@ func (r *mutationResolver) PostPhoto(ctx context.Context, input model.PostPhotoI
 	if err != nil {
 		return nil, err
 	}
+
+	r.mutex.Lock()
+	for _, ch := range r.photoSubscribers {
+		ch <- photo
+	}
+	r.mutex.Unlock()
 
 	return photo, nil
 }
@@ -82,6 +105,12 @@ func (r *mutationResolver) AddFakeUsers(ctx context.Context, count int) ([]*mode
 	for i, user := range users {
 		serv.PostUser(user.GithubLogin, user.Name, user.Avatar, tokens[i])
 	}
+
+	r.mutex.Lock()
+	for _, ch := range r.userSubscribers {
+		ch <- users
+	}
+	r.mutex.Unlock()
 
 	return users, nil
 }
@@ -126,11 +155,59 @@ func (r *queryResolver) AllUsers(ctx context.Context) ([]*model.User, error) {
 	return users, nil
 }
 
+func (r *subscriptionResolver) NewUsers(ctx context.Context, githubLogin string) (<-chan []*model.User, error) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	if _, ok := r.userSubscribers[githubLogin]; ok {
+		err := fmt.Errorf("`%s` has already been subscribed", githubLogin)
+		return nil, err
+	}
+
+	ch := make(chan []*model.User, 1)
+	r.userSubscribers[githubLogin] = ch
+
+	go func() {
+		<-ctx.Done()
+		r.mutex.Lock()
+		delete(r.userSubscribers, githubLogin)
+		r.mutex.Unlock()
+	}()
+
+	return ch, nil
+}
+
+func (r *subscriptionResolver) NewPhoto(ctx context.Context, githubLogin string) (<-chan *model.Photo, error) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	if _, ok := r.photoSubscribers[githubLogin]; ok {
+		err := fmt.Errorf("`%s` has already been subscribed", githubLogin)
+		return nil, err
+	}
+
+	ch := make(chan *model.Photo, 1)
+	r.photoSubscribers[githubLogin] = ch
+
+	go func() {
+		<-ctx.Done()
+		r.mutex.Lock()
+		delete(r.photoSubscribers, githubLogin)
+		r.mutex.Unlock()
+	}()
+
+	return ch, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+// Subscription returns generated.SubscriptionResolver implementation.
+func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subscriptionResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type subscriptionResolver struct{ *Resolver }

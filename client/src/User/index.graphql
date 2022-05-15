@@ -1,16 +1,24 @@
+fragment userInfo on User {
+    githubLogin
+    name
+    avatar
+}
+
 query allUsers {
     totalUsers
     allUsers {
-        githubLogin
-        name
-        avatar
+        ...userInfo
     }
 }
 
 mutation addFakeUsers($count: Int!) {
     addFakeUsers(count: $count) {
-        githubLogin
-        name
-        avatar
+        ...userInfo
+    }
+}
+
+subscription newUsers($githubLogin: String!) {
+    newUsers(githubLogin: $githubLogin) {
+        ...userInfo
     }
 }

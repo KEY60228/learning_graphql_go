@@ -1,14 +1,16 @@
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { User } from './User'
-import { AuthorizedUser } from './AuthorizedUser'
+import { PostPhoto } from './PostPhoto';
 
 const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <AuthorizedUser />
-      <User />
+      <Routes>
+        <Route path="/" element={<User />} />
+        <Route path="/newPhoto" element={<PostPhoto />} />
+      </Routes>
     </BrowserRouter>
   )
 }
